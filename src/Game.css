@@ -1,0 +1,5 @@
+.game-board {
+  height: 641px;
+  width: 720px;
+  background-image: url(http://localhost:3001/static/backgammonImage.jpg);
+}
