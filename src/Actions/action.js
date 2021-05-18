@@ -19,3 +19,10 @@ export const CreateGame = (game) => ({
 export const RemoveGame = () => ({
 	type: "remove_game"
 })
+
+export const AddBoardColumn = (column) => ({
+	type: "add_board_column",
+	payload: {
+		column: column
+	}
+})

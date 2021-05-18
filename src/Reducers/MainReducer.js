@@ -17,3 +17,13 @@ export function GameReducer(state = null, action){
     }
     return state;
 }
+
+export function BoardReducer(state = [], action){
+    if(action.type === 'add_board_column'){
+        return [...state, action.payload.column];
+    } 
+    else if(action.type === 'remove_board'){
+        state = [];
+    }
+    return state;
+}

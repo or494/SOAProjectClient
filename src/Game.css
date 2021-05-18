@@ -3,3 +3,15 @@
   width: 720px;
   background-image: url(http://localhost:3001/static/backgammonImage.jpg);
 }
+
+.game-board-row {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr 18fr 1fr;
+}
+
+.game-board-column {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 9fr 2fr 9fr 1fr;
+}
