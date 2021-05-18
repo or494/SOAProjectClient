@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { useHistory } from "react-router";
 import configurations from './configurations';
-import ConnectSocket from './ConnectSocket';
 
 const Login = (props) => {
   const [username,setUsername] = useState('');

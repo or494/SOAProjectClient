@@ -2,7 +2,6 @@ import { useState } from "react";
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import configurations from './configurations';
-import ConnectSocket from './ConnectSocket';
 
 function Register(props) {
     const [username, setUsername] = useState();
