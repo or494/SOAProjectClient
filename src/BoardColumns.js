@@ -3,7 +3,10 @@ import React from 'react';
 
 function BoardColumns(props) {
     const handleColumnClick = (event) => {
-        props.click(event.target.id); // fix later
+        if(event.target.id == null || event.target.id == undefined || event.target.id.length == 0)
+            props.click(event.target.parentElement.id);
+        else
+            props.click(event.target.id);
     }
 
     const rows = [];

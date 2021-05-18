@@ -13,7 +13,9 @@ code {
 }
 
 .coin {
-  height: 50px;
+  height: 30px;
+  width: 30px;
+  background-size: cover;
 }
 
 .black-coin {

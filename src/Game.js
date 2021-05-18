@@ -1,12 +1,13 @@
 import './Game.css';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import configurations from './configurations';
 import BoardSide from './BoardSide';
 
 const Game = (props) => {
     const gameData = useSelector(state => state.gameObject);
+    const socket = useSelector(state => state.socketIO);
     let number = -1;
+    const [isPreGame, setIsPreGame] = useState(true);
 
     const mapIndexToColumn = (index) => {
         let element;
@@ -19,12 +20,24 @@ const Game = (props) => {
         }else if(index >= 18 && index <= 23){
             element = document.getElementById("RightTop" + (index - 18));
         }
-        console.log(element);
         return element;
     }
 
     useEffect(() => {
-        console.log(gameData);
+        InitializeSocketGameEvents();
+        // InitializeBoard();
+
+    }, []);
+
+    const ThrowOneDice = () => {
+
+    }
+
+    const InitializeSocketGameEvents = () => {
+
+    }
+
+    const InitializeBoard = () => {
         gameData.game.ds.board.forEach((column, index) => {
             column.forEach(coin => {
                 const element = mapIndexToColumn(index);
@@ -32,7 +45,7 @@ const Game = (props) => {
                 else element.innerHTML += `<div class="white-coin coin"></div>`;
             })
         });
-    }, []);
+    }
 
     const mapperColumnToIndex = (elementId) => {
         if(elementId.includes('LeftTop')){
@@ -47,10 +60,23 @@ const Game = (props) => {
         else if(elementId.includes('RightTop')){
             number = parseInt(elementId[elementId.length - 1]) + 18;
         }
-        console.log(number);
     }
 
+    const moveCoin = (src, dst) => {
+        const removeFromElement = mapIndexToColumn(src);
+        const coin = removeFromElement.removeChild(removeFromElement.childNodes[removeFromElement.childNodes.length - 1]);
+        const addToElement = mapIndexToColumn(dst);
+        addToElement.appendChild(coin);
+    }
 
+    const clearCoins = () => {
+        for (let index = 0; index < 5; index++) {
+            document.getElementById("RightBottom" + index).innerHTML = '';
+            document.getElementById("RightTop" + index).innerHTML = '';
+            document.getElementById("LeftBottom" + index).innerHTML = '';
+            document.getElementById("LeftTop" + index).innerHTML = '';
+        }
+    }
 
     return (
         <div>
@@ -65,35 +91,11 @@ const Game = (props) => {
                     </div>
                 </div>
             </div>
+            <div>Your color: {gameData.color ? 'white' : 'black'}</div>
+            <button>Throw one dice</button>
         </div>
     );
 }
+// TODO: add whos turn, 
 
 export default Game;
-
-// const mapIndexToColumn = (index) => {
-//     let parentElement;
-//     if(index >= 0 && index <= 5){
-//         parentElement = document.getElementById("RightBottom");
-//     } else if(index >= 6 && index <= 11){
-//         parentElement = document.getElementById("LeftBottom");
-//     }else if(index >= 12 && index <= 17){
-//         parentElement = document.getElementById("LeftTop");
-//     }else if(index >= 18 && index <= 23){
-//         parentElement = document.getElementById("RightTop");
-//     }
-//     TakeFromColumn(parentElement);
-//     console.log(parentElement.id);
-// }
-
-// const TakeFromColumn = (element) => {
-//     if(element.id.includes('Top')) {
-//         for(let x = 0;x<element.childNodes.length;x++){
-//             if(element.childNodes[x] == undefined) return element.childNodes[x - 1] == undefined ? undefined : element.childNodes[x - 1];
-//         }
-//     } else if(element.id.includes('Bottom')){
-//         for(let x = element.childNodes.length - 1;x>=0;x--){
-//             if(element.childNodes[x] == undefined) return element.childNodes[x + 1] == undefined ? undefined : element.childNodes[x + 1];
-//         }
-//     }
-// }
