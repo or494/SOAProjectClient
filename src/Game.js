@@ -16,7 +16,7 @@ const Game = (props) => {
     const [chosenColumnIndexSrc, setChosenColumnIndexSrc] = useState(undefined);
 
 
-    const mapIndexToColumn = (index) => {
+    const mapIndexToColumn = (index, isOut) => {
         let element;
         if(index >= 0 && index <= 5){
             element = document.getElementById("RightBottom" + (5 - index));
@@ -26,6 +26,12 @@ const Game = (props) => {
             element = document.getElementById("LeftTop" + (index - 12));
         }else if(index >= 18 && index <= 23){
             element = document.getElementById("RightTop" + (index - 18));
+        }else if(index == 24){
+            if(isOut)element = document.getElementById('outBlackCoins')
+            else element = document.getElementById('whiteEatenColumn');
+        }else if(index == -1){
+            if(isOut)element = document.getElementById('outWhiteCoins')
+            else element = document.getElementById('blackEatenColumn');
         }
         return element;
     }
@@ -72,8 +78,21 @@ const Game = (props) => {
             setIsThrowDices(false);
         });
         socket.on('moveCoins', (result) => {
-            console.log(result);
+            const destinationElement = mapIndexToColumn(result.dst, result.isTookOut ? true : false);
+            if(result.isEatenOnDst){
+                const eatenCoin = destinationElement.removeChild(destinationElement.lastChild);
+                if(result.isEatenOnDst.color) document.getElementById('whiteEatenColumn').appendChild(eatenCoin);
+                else document.getElementById('blackEatenColumn').appendChild(eatenCoin);
+            }
+            const columnElement = mapIndexToColumn(result.src);
+            console.log(columnElement);
+            const removedElement = columnElement.removeChild(columnElement.lastChild);
+            destinationElement.appendChild(removedElement);
         });
+
+
+
+
         socket.on('winner', (data) => {
             console.log(data);
         })
@@ -101,13 +120,23 @@ const Game = (props) => {
         }
         else if(elementId.includes('RightTop')){
             number = parseInt(elementId[elementId.length - 1]) + 18;
+        } 
+        else if(elementId === 'whiteEatenColumn'){
+            number = 24;
+        } 
+        else if(elementId === 'blackEatenColumn'){
+            number = -1;
+        }
+        else if(elementId === "outBlackCoins"){
+            number = 24;
+        }
+        else if(elementId === "outWhiteCoins"){
+            number = -1;
         }
         return number;
     }
 
     const handleSendMovement = (elementId) => {
-        console.log(chosenColumnIndexSrc);
-        console.log(mapperColumnToIndex(elementId));
         if(chosenColumnIndexSrc === undefined){
             setChosenColumnIndexSrc(mapperColumnToIndex(elementId));
         } else {
@@ -115,6 +144,13 @@ const Game = (props) => {
                 socket.emit('move', {src: chosenColumnIndexSrc, dst: mapperColumnToIndex(elementId)});
             setChosenColumnIndexSrc(undefined);
         }
+    }
+
+    const handleTookOrEatenClick = (event) => {
+        if(event.target.id == null || event.target.id == undefined || event.target.id.length == 0)
+            handleSendMovement(event.target.parentElement.id);
+        else
+            handleSendMovement(event.target.id);
     }
 
     const moveCoin = (src, dst) => {
@@ -137,13 +173,16 @@ const Game = (props) => {
         <div className="game-main-grid">
             <div className="game-board">
                 <div className="game-board-row">
-                    <div></div>
+                    <div id="outWhiteCoins" className="game-out-coins" onClick={handleTookOrEatenClick}></div>
                     <div className="game-board-column">
                         <div></div>
                         <BoardSide id="Left" click={handleSendMovement}></BoardSide>
-                        <div></div>
+                        <div id="whiteEatenColumn" className="game-eaten-column" onClick={handleTookOrEatenClick}>
+                        </div>
+                        <div id="blackEatenColumn" className="game-eaten-column" onClick={handleTookOrEatenClick}></div>
                         <BoardSide id="Right" click={handleSendMovement}></BoardSide>
                     </div>
+                    <div id="outBlackCoins" className="game-out-coins" onClick={handleTookOrEatenClick}></div>
                 </div>
             </div>
             <div>
