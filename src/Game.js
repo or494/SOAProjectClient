@@ -8,6 +8,12 @@ const Game = (props) => {
     const socket = useSelector(state => state.socketIO);
     let number = -1;
     const [isPreGame, setIsPreGame] = useState(true);
+    const [isThrowDices, setIsThrowDices] = useState(false);
+    const [isMyTurn, setIsMyTurn] = useState(false);
+    const [rivalDice, setRivalDice] = useState();
+    const [dice, setDice] = useState();
+    const [dices, setDices] = useState([]);
+
 
     const mapIndexToColumn = (index) => {
         let element;
@@ -25,16 +31,44 @@ const Game = (props) => {
 
     useEffect(() => {
         InitializeSocketGameEvents();
-        // InitializeBoard();
+        InitializeBoard();
 
     }, []);
 
-    const ThrowOneDice = () => {
+    const throwOneDice = () => {
+        socket.emit('throwOneDice');
+        setIsPreGame(false);
+    }
 
+    const throwDices = () => {
+        socket.emit('throwDices');
     }
 
     const InitializeSocketGameEvents = () => {
-
+        socket.on('oneDiceRivalSucceed', dice => setRivalDice(dice));
+        socket.on('oneDiceSucceed', dice => setDice(dice));
+        socket.on('throwOneDiceAgain', () => {
+            setIsPreGame(true);
+            setRivalDice(false);
+            setDice(false);
+        })
+        socket.on('start', whoStarts => {
+            setIsPreGame(false);
+            setRivalDice(false);
+            setDice(false);
+            if(gameData.color == whoStarts){
+                setIsMyTurn(true);
+                setIsThrowDices(true);
+            } else{
+                setIsMyTurn(false);
+                setIsThrowDices(false);
+            }
+            setDices([]);
+        });
+        socket.on('throwTwoDicesSucceed', dices => {
+            setDices(dices)
+            setIsThrowDices(false);
+        });
     }
 
     const InitializeBoard = () => {
@@ -79,7 +113,7 @@ const Game = (props) => {
     }
 
     return (
-        <div>
+        <div className="game-main-grid">
             <div className="game-board">
                 <div className="game-board-row">
                     <div></div>
@@ -91,8 +125,15 @@ const Game = (props) => {
                     </div>
                 </div>
             </div>
-            <div>Your color: {gameData.color ? 'white' : 'black'}</div>
-            <button>Throw one dice</button>
+            <div>
+                <div>Your color: {gameData.color ? 'white' : 'black'}</div>
+                {isPreGame ? <button onClick={throwOneDice}>Throw one dice</button> : null}
+                {isPreGame == false &&  isThrowDices ? <button onClick={throwDices}>Throw dices</button> : null}
+                {isPreGame == false ? (isMyTurn ?  <div>its your turn</div>: <div>its rival's turn</div>) : null}
+                {rivalDice ? <div>rival dice {rivalDice}</div> : null}
+                {dice ? <div>yout dice: {dice}</div> : null}
+                {dices.length > 0 ? <div>dices: {dices[0]} {dices[1]}</div>: null}
+            </div>
         </div>
     );
 }
