@@ -13,6 +13,7 @@ const Game = (props) => {
     const [rivalDice, setRivalDice] = useState();
     const [dice, setDice] = useState();
     const [dices, setDices] = useState([]);
+    const [chosenColumnIndexSrc, setChosenColumnIndexSrc] = useState(undefined);
 
 
     const mapIndexToColumn = (index) => {
@@ -53,6 +54,7 @@ const Game = (props) => {
             setDice(false);
         })
         socket.on('start', whoStarts => {
+            console.log('start')
             setIsPreGame(false);
             setRivalDice(false);
             setDice(false);
@@ -69,6 +71,12 @@ const Game = (props) => {
             setDices(dices)
             setIsThrowDices(false);
         });
+        socket.on('moveCoins', (result) => {
+            console.log(result);
+        });
+        socket.on('winner', (data) => {
+            console.log(data);
+        })
     }
 
     const InitializeBoard = () => {
@@ -93,6 +101,19 @@ const Game = (props) => {
         }
         else if(elementId.includes('RightTop')){
             number = parseInt(elementId[elementId.length - 1]) + 18;
+        }
+        return number;
+    }
+
+    const handleSendMovement = (elementId) => {
+        console.log(chosenColumnIndexSrc);
+        console.log(mapperColumnToIndex(elementId));
+        if(chosenColumnIndexSrc === undefined){
+            setChosenColumnIndexSrc(mapperColumnToIndex(elementId));
+        } else {
+            if(chosenColumnIndexSrc != mapperColumnToIndex(elementId)) 
+                socket.emit('move', {src: chosenColumnIndexSrc, dst: mapperColumnToIndex(elementId)});
+            setChosenColumnIndexSrc(undefined);
         }
     }
 
@@ -119,9 +140,9 @@ const Game = (props) => {
                     <div></div>
                     <div className="game-board-column">
                         <div></div>
-                        <BoardSide id="Left" click={mapperColumnToIndex}></BoardSide>
+                        <BoardSide id="Left" click={handleSendMovement}></BoardSide>
                         <div></div>
-                        <BoardSide id="Right" click={mapperColumnToIndex}></BoardSide>
+                        <BoardSide id="Right" click={handleSendMovement}></BoardSide>
                     </div>
                 </div>
             </div>
