@@ -18,11 +18,26 @@ export const CreateGame = (game) => ({
 
 export const RemoveGame = () => ({
 	type: "remove_game"
-})
+});
 
 export const AddBoardColumn = (column) => ({
 	type: "add_board_column",
 	payload: {
 		column: column
 	}
-})
+});
+
+export const AddFriendToList = (friend) => ({
+	type: "add_friend_to_list",
+	payload: {
+		friend: friend
+	}
+});
+
+export const AddChatToList = (userId, messages) => ({
+	type: "add_chat_to_list",
+	payload:{
+		userId: userId,
+		messages: messages ? messages : []
+	}
+});

@@ -27,3 +27,17 @@ export function BoardReducer(state = [], action){
     }
     return state;
 }
+
+export function FriendsReducer(state = [], action){
+    if(action.type === 'add_friend_to_list'){
+        return [...state, action.payload.friend];
+    }
+    return state;
+}
+
+export function ChatsReducer(state = [], action){
+    if(action.type == 'add_chat_to_list'){
+        return [...state, action.payload];
+    }
+    return state;
+}

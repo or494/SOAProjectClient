@@ -10,6 +10,7 @@ import Register from './Register';
 import Menu from './Menu';
 import Login from './Login';
 import Game from './Game';
+import Friends from './Friends';
 
 const store = createStore(allReducers,  
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
@@ -29,6 +30,9 @@ ReactDOM.render(
         </Route>
         <Route path="/game" exact="true">
           <Game></Game>
+        </Route>
+        <Route path="/friends" exact="true">
+          <Friends></Friends>
         </Route>
       </Switch>
     </Provider>

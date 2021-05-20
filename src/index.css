@@ -25,3 +25,17 @@ code {
 .white-coin {
   background-image: url(http://localhost:3001/static/WhiteCoin.png);
 }
+
+.MuiButton-fullWidth {
+  height: 100% !important;
+}
+
+.MuiDrawer-paper {
+  width: 400px;
+}
+
+.MuiFab-root {
+  position: fixed !important;
+  right: 20px;
+  bottom: 20px;
+}
