@@ -1,43 +1,54 @@
 import './Chat.css';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import configurations from './configurations';
+import { Socket } from 'socket.io-client';
+import { AddMessageToState } from './Actions/action';
+import Message from './Message';
 
 function Chat(props) {
-    const chats = useSelector(state => state.chatsList);
-    const [chat, setChat] = useState();
+    const dispatch = useDispatch();
+    const socket = useSelector(state => state.socketIO);
+    const messages = useSelector(state => state.messageList);
+    const [chatMessages, setChatMessages] = useState([]);
+    const [input, setInput] = useState('');
 
     useEffect(() => {
-        loadChat();
-    }, [])
+        loadMessages();
+    }, [messages])
 
-    const loadChat = async() =>{
-        chats.forEach(chatData => {
-            if(props.user == chatData.userId) setChat(chatData);
+    const loadMessages = async() =>{
+        const tmpMessages = [];
+        messages.forEach(message => {
+            if(message.sender == props.user.id || message.reciever == props.user.id) tmpMessages.push(message);
         });
-    
-        if(!chat) setChat(await GetChatData());
-
-        console.log(chat);
+        setChatMessages(tmpMessages);
+        console.log(tmpMessages);
     }
 
-    const GetChatData = () => {
-        return new Promise((resolve) => {
-            axios.get(configurations.server + 'getChatData/' + props.user, {withCredentials: true}).then(result =>{
-                resolve(result.data);
-            }).catch(err => console.log(err));
-        })
+    const sendMessage = () => {
+        if(input != ''){
+            socket.emit('messageSend', {target: props.user.id, content: input});
+            dispatch(AddMessageToState({reciever: props.user.id, content: input, sendTime: (new Date()).toString()}));
+            setInput('');
+        }
+    }
+
+    const handleInputChange = (event) => {
+        setInput(event.target.value);
     }
 
     return (
         <div className="chat-container">
             <div className="chat-main-grid">
                 <div className="chat-messages-view">
-
+                    {chatMessages.map(message => {
+                        return <Message>sender: {message.sender}, reciever: {message.reciever}, content: {message.content}</Message> 
+                    })}
                 </div>
                 <div className="chat-input-view">
-
+                    message<input type="text" value={input} onChange={handleInputChange}></input>
+                    <button onClick={sendMessage}>Send</button>
                 </div>
             </div>
         </div>

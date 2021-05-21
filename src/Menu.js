@@ -3,12 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import configurations from './configurations';
 import socketIOClient from 'socket.io-client';
-import { CreateSocket } from './Actions/action';
+import { AddMessageToState, CreateSocket } from './Actions/action';
 import {CreateGame} from './Actions/action';
 import { useHistory } from 'react-router';
 import { Button } from '@material-ui/core';
 import AccountCircleSharpIcon from '@material-ui/icons/AccountCircleSharp';
-import SportsEsportsIcon from '@material-ui/icons/SportsEsports';
 import { Drawer, Fab } from '@material-ui/core';
 import PeopleIcon from '@material-ui/icons/People';
 import Friends from './Friends';
@@ -23,6 +22,11 @@ function Menu(props) {
     const [isDrawOpen, setIsDrawOpen] = useState(false);
 
     useEffect(() => {
+        InitializeAppData();
+    }, []);
+
+    const InitializeAppData = () => {
+        GetChatsData();
         if(socket == null){
             const newSocket = socketIOClient(configurations.server, {
                 withCredentials: true
@@ -39,24 +43,20 @@ function Menu(props) {
                 history.push('/game');
             })
             newSocket.on('messageRecieved', async message => {
-                let chat;
-                chats.forEach(chatData => {
-                    if(props.user == chatData.userId) chat.message.push(); // TODO: FIX
-                });
-            
-                if(!chat) chat = await GetChatData();
-
-                console.log(chat);
+                dispatch(AddMessageToState(message));
             })
         }
-    }, []);
+    }
 
-    const GetChatData = () => {
-        return new Promise((resolve) => {
-            axios.get(configurations.server + 'getChatData', {withCredentials: true}).then(result =>{
-                resolve(result.data);
-            }).catch(err => console.log(err));
-        })
+    const GetChatsData = () => {
+        axios.get(configurations.server + 'getUserChats', {withCredentials: true}).then(result =>{
+            console.log(result.data);
+            result.data.forEach(chat => {
+                chat.messages.forEach(message => {
+                    dispatch(AddMessageToState(message));
+                })
+            })
+        }).catch(err => console.log(err));
     }
 
     const requestRandomGame = () => {
@@ -81,7 +81,7 @@ function Menu(props) {
             </div>
             <div className="align-center justify-space">
                 <div className="menu-big-button">
-                    <Button color="primary" variant="contained" fullWidth="true">
+                    <Button color="primary" variant="contained" fullWidth="true" onClick={requestRandomGame}>
                         <div>Join Game</div>
                     </Button>
                 </div>

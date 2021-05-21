@@ -35,9 +35,9 @@ export function FriendsReducer(state = [], action){
     return state;
 }
 
-export function ChatsReducer(state = [], action){
-    if(action.type == 'add_chat_to_list'){
-        return [...state, action.payload];
+export function MessageReducer(state = [], action){
+    if(action.type == 'add_message_to_chat'){
+        return [...state, action.payload.message];
     }
     return state;
 }

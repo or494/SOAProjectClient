@@ -34,10 +34,9 @@ export const AddFriendToList = (friend) => ({
 	}
 });
 
-export const AddChatToList = (userId, messages) => ({
-	type: "add_chat_to_list",
+export const AddMessageToState = (message) => ({
+	type: "add_message_to_chat",
 	payload:{
-		userId: userId,
-		messages: messages ? messages : []
+		message: message
 	}
-});
+})

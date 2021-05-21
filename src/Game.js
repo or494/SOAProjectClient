@@ -40,7 +40,6 @@ const Game = (props) => {
     useEffect(() => {
         InitializeSocketGameEvents();
         InitializeBoard();
-
     }, []);
 
     const throwOneDice = () => {
