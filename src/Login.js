@@ -63,7 +63,7 @@ const Login = (props) => {
             </div>
             <div>{usernameError}</div>
             <div>
-                password <input type="text" value={password} onChange={changePassword}/>
+                password <input type="password" value={password} onChange={changePassword}/>
             </div>
             <div>{passwordError}</div>
             <button onClick={login}>login</button>
