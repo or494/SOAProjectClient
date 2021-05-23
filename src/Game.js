@@ -13,6 +13,9 @@ const Game = (props) => {
     const [rivalDice, setRivalDice] = useState();
     const [dice, setDice] = useState();
     const [dices, setDices] = useState([]);
+    const [dicesToShow, setDicesToShow] = useState([]);
+    const [resultAfterMoving, setResultAfterMoving] = useState(0);
+
     const [chosenColumnIndexSrc, setChosenColumnIndexSrc] = useState(undefined);
     const [isWinner, setIsWinner] = useState(undefined);
 
@@ -37,10 +40,33 @@ const Game = (props) => {
         return element;
     }
 
+
     useEffect(() => {
         InitializeSocketGameEvents();
         InitializeBoard();
     }, []);
+
+    useEffect(() => {
+        setDicesToShow(dices.map(d => {
+            return { value: d, isPlayed: false };
+        }))
+    }, [dices])
+
+    useEffect(() => {
+        console.log("on user effect listening to dices")
+        console.log(dicesToShow);
+    }, [dicesToShow])
+
+    useEffect(() => {
+        let dicesToShowCopy = dicesToShow;
+        const diceElement = dicesToShowCopy.find(d => d.value === resultAfterMoving.diceStepPlayed && !d.isPlayed)
+        if (diceElement !== undefined) {
+            diceElement.isPlayed = true;
+        }
+        setDicesToShow(dicesToShowCopy);
+    }, [resultAfterMoving])
+
+
 
     const throwOneDice = () => {
         socket.emit('throwOneDice');
@@ -60,7 +86,6 @@ const Game = (props) => {
             setDice(false);
         })
         socket.on('start', whoStarts => {
-            console.log('start')
             setIsPreGame(false);
             setRivalDice(false);
             setDice(false);
@@ -72,12 +97,33 @@ const Game = (props) => {
                 setIsThrowDices(false);
             }
             setDices([]);
+            setDicesToShow([]);
         });
         socket.on('throwTwoDicesSucceed', dices => {
             setDices(dices)
             setIsThrowDices(false);
         });
         socket.on('moveCoins', (result) => {
+            setResultAfterMoving(result);
+
+
+
+
+            //let dicesAfterTurn = dices.filter(d => d !== result.diceStepPlayed);
+            // debugger;
+            // if(dicesAfterTurn.length===0){
+            //     dicesAfterTurn = dices;
+            //     dicesAfterTurn = dicesAfterTurn.pop();
+            //     setDices(dicesAfterTurn);
+            // }
+            // else{
+            //     setDices(dicesAfterTurn);
+            // }
+            // console.log("after: ");
+            // console.log(dices);
+            // debugger;
+            // setDices(dices.filter(d => d !== result.diceStepPlayed));
+            // console.log("after: "+dices);
             const destinationElement = mapIndexToColumn(result.dst, result.isTookOut ? true : false);
             if (result.isEatenOnDst) {
                 const eatenCoin = destinationElement.removeChild(destinationElement.lastChild);
@@ -85,7 +131,6 @@ const Game = (props) => {
                 else document.getElementById('blackEatenColumn').appendChild(eatenCoin);
             }
             const columnElement = mapIndexToColumn(result.src);
-            console.log(columnElement);
             const removedElement = columnElement.removeChild(columnElement.lastChild);
             destinationElement.appendChild(removedElement);
         });
@@ -136,8 +181,38 @@ const Game = (props) => {
     }
 
     const handleSendMovement = (elementId) => {
+        for (let i = 0; i <= 23; i++) {
+            let element = mapIndexToColumn(i);
+            element.style.backgroundColor = "transparent";
+            element.style.opacity = "1";
+        }
         if (chosenColumnIndexSrc === undefined) {
             setChosenColumnIndexSrc(mapperColumnToIndex(elementId));
+
+            let currColClicked = mapperColumnToIndex(elementId);
+            let elementClicked = document.getElementById(elementId);
+            if (elementClicked.childNodes.length !== 0 &&
+                (elementClicked.childNodes[0].className.includes(gameData.color ? "white" : "black"))) {
+                if (currColClicked >= 0 && currColClicked <= 23) {
+                    elementClicked.style.backgroundColor = "khaki";
+                    elementClicked.style.opacity = "0.5";
+                }
+                dicesToShow.forEach(d => {
+                    // mapper to dst posiiblity by dices => 
+                    //check if dst elemnt has kids, if has kids check if class name includes same color 
+                    //if so-> draw background
+                    if(!d.isPlayed){
+                        let dstCol = gameData.color ? currColClicked - d.value : currColClicked + d.value;
+                        let dstElement = mapIndexToColumn(dstCol);
+                        if (dstElement.childNodes.length === 0 ||
+                            (dstElement.childNodes[0].className.includes(gameData.color ? "white" : "black")) ||
+                            dstElement.childNodes.length === 1) {
+                            dstElement.style.backgroundColor = "green";
+                            dstElement.style.opacity = "0.5";
+                        }
+                    }
+                })
+            }
         } else {
             if (chosenColumnIndexSrc != mapperColumnToIndex(elementId))
                 socket.emit('move', { src: chosenColumnIndexSrc, dst: mapperColumnToIndex(elementId) });
@@ -190,8 +265,11 @@ const Game = (props) => {
                 {isPreGame == false && isThrowDices ? <button onClick={throwDices}>Throw dices</button> : null}
                 {isPreGame == false ? (isMyTurn ? <div>its your turn</div> : <div>its rival's turn</div>) : null}
                 {rivalDice ? <div>rival dice {rivalDice}</div> : null}
-                {dice ? <div>yout dice: {dice}</div> : null}
-                {dices.length > 0 ? <div>dices: {dices[0]} {dices[1]}</div> : null}
+                {dice ? <div>your dice: {dice}</div> : null}
+                {dicesToShow.map(d => {
+                    if (d.isPlayed) return <div className="dice-played">{d.value}</div>
+                    else return <div>{d.value}</div>
+                })}
                 {isWinner !== undefined ? (isWinner === gameData.color ? <div>You are the winner!</div> : <div>You lost!</div>) : null}
             </div>
         </div>
