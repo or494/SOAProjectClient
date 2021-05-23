@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import configurations from './configurations';
 import socketIOClient from 'socket.io-client';
-import { AddMessageToState, CreateSocket } from './Actions/action';
+import { AddFriendToList, AddMessageToState, CreateSocket, SaveUserId, ChangeIsConnected } from './Actions/action';
 import {CreateGame} from './Actions/action';
 import { useHistory } from 'react-router';
 import { Button } from '@material-ui/core';
@@ -12,7 +12,12 @@ import { Drawer, Fab } from '@material-ui/core';
 import PeopleIcon from '@material-ui/icons/People';
 import Friends from './Friends';
 import axios from 'axios';
+import Slide from '@material-ui/core/Slide';
 
+
+function TransitionRight(props) {
+    return <Slide {...props} direction="right" />;
+}
 
 function Menu(props) {
     const chats = useSelector(state => state.chatsList);
@@ -27,6 +32,7 @@ function Menu(props) {
 
     const InitializeAppData = () => {
         GetChatsData();
+        GetUserId();
         if(socket == null){
             const newSocket = socketIOClient(configurations.server, {
                 withCredentials: true
@@ -44,8 +50,25 @@ function Menu(props) {
             })
             newSocket.on('messageRecieved', async message => {
                 dispatch(AddMessageToState(message));
+            });
+            newSocket.on('friendAdded', friend => {
+                dispatch(AddFriendToList(friend));
+            });
+            newSocket.on('friendConnected', userId => {
+                console.log('user ' + userId + ' connected')
+                dispatch(ChangeIsConnected(userId, true));
+            });
+            newSocket.on('friendDisconnected', userId => {
+                console.log('user ' + userId + ' disconnected')
+                dispatch(ChangeIsConnected(userId, false));
             })
         }
+    }
+    
+    const GetUserId = () => {
+        axios.get(configurations.server + 'getUserId', {withCredentials:true}).then(result => {
+            dispatch(SaveUserId(result.data));
+        })
     }
 
     const GetChatsData = () => {
@@ -58,6 +81,7 @@ function Menu(props) {
             })
         }).catch(err => console.log(err));
     }
+    
 
     const requestRandomGame = () => {
         socket.emit('requestRandomGame');

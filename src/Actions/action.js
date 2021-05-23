@@ -36,7 +36,22 @@ export const AddFriendToList = (friend) => ({
 
 export const AddMessageToState = (message) => ({
 	type: "add_message_to_chat",
-	payload:{
+	payload: {
 		message: message
+	}
+})
+
+export const SaveUserId = (userId) => ({
+	type: "save_user_id",
+	payload: {
+		userId: userId
+	}
+})
+
+export const ChangeIsConnected = (userId, isConnected) => ({
+	type: "change_is_connected",
+	payload: {
+		userId: userId,
+		isConnected: isConnected
 	}
 })

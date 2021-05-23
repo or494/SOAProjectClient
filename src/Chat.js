@@ -10,6 +10,7 @@ function Chat(props) {
     const dispatch = useDispatch();
     const socket = useSelector(state => state.socketIO);
     const messages = useSelector(state => state.messageList);
+    const userId = useSelector(state => state.userId);
     const [chatMessages, setChatMessages] = useState([]);
     const [input, setInput] = useState('');
 
@@ -29,7 +30,7 @@ function Chat(props) {
     const sendMessage = () => {
         if(input != ''){
             socket.emit('messageSend', {target: props.user.id, content: input});
-            dispatch(AddMessageToState({reciever: props.user.id, content: input, sendTime: (new Date()).toString()}));
+            dispatch(AddMessageToState({sender: userId, reciever: props.user.id, content: input, sendTime: (new Date()).toString()}));
             setInput('');
         }
     }
@@ -43,7 +44,7 @@ function Chat(props) {
             <div className="chat-main-grid">
                 <div className="chat-messages-view">
                     {chatMessages.map(message => {
-                        return <Message>sender: {message.sender}, reciever: {message.reciever}, content: {message.content}</Message> 
+                        return <Message message={message}></Message> 
                     })}
                 </div>
                 <div className="chat-input-view">

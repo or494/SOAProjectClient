@@ -11,7 +11,3 @@
   display: grid;
   grid-template-rows: 9fr 1fr;
 }
-
-.chat-messages-view {
-  display: flex;
-}
