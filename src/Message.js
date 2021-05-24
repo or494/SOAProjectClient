@@ -1,6 +1,7 @@
 import './Message.css';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { SendSharp } from '@material-ui/icons';
 
 function Message(props) {
     const friendList = useSelector(state => state.friendsList);
@@ -17,12 +18,11 @@ function Message(props) {
     }, [])
 
     return (
-        <p>
-            {sender}: {props.message.content}
-            <div>
-                time:{props.message.sendTime}
-            </div>
-        </p>
+        <div className={sender == 'you' ? 'message-sender' : 'message-reciever'}>
+            <div className="message-container">
+                {props.message.content}
+            </div> 
+        </div>
     );
 }
 

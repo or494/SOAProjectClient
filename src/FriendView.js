@@ -20,6 +20,10 @@ function FriendView(props) {
         socket.emit('AddToFriends', props.user.id);
     }
 
+    const inviteToGame = () => {
+        socket.emit('invite', props.user.id);
+    }
+
     return (
         <div className="friend-view-container">
             <div className="friend-view-grid">
@@ -30,7 +34,7 @@ function FriendView(props) {
                         <Button fullWidth="true" user={props.user} onClick={() => setIsChatModalOpen(true)}>
                             Chat
                         </Button>
-                        <Button fullWidth="true">
+                        <Button fullWidth="true" onClick={inviteToGame}>
                             Invite to game
                         </Button>
                     </div>) : 

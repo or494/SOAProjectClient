@@ -6,29 +6,33 @@ import socketIOClient from 'socket.io-client';
 import { AddFriendToList, AddMessageToState, CreateSocket, SaveUserId, ChangeIsConnected } from './Actions/action';
 import {CreateGame} from './Actions/action';
 import { useHistory } from 'react-router';
-import { Button } from '@material-ui/core';
+import { Button, Snackbar } from '@material-ui/core';
 import AccountCircleSharpIcon from '@material-ui/icons/AccountCircleSharp';
 import { Drawer, Fab } from '@material-ui/core';
 import PeopleIcon from '@material-ui/icons/People';
 import Friends from './Friends';
 import axios from 'axios';
-import Slide from '@material-ui/core/Slide';
-
-
-function TransitionRight(props) {
-    return <Slide {...props} direction="right" />;
-}
+import Alert from '@material-ui/lab/Alert';
 
 function Menu(props) {
     const chats = useSelector(state => state.chatsList);
+    const friends = useSelector(state => state.friendsList);
     const dispatch = useDispatch();
     const history = useHistory();
     let socket = useSelector(state => state.socketIO);
     const [isDrawOpen, setIsDrawOpen] = useState(false);
+    const [isInvited, setIsInvited] = useState(false);
+    const [gameInvitation, setGameInvitation] = useState();
+    const [errMsg, setErrMsg] = useState();
 
     useEffect(() => {
         InitializeAppData();
     }, []);
+
+    useEffect(() => {
+        const user = friends.find(user => user.id == isInvited);
+        setGameInvitation(user);
+    }, [isInvited])
 
     const InitializeAppData = () => {
         GetChatsData();
@@ -44,9 +48,13 @@ function Menu(props) {
                 console.log('waiting in queue');
             });
             newSocket.on('joinGame', gameObject => {
-                dispatch(CreateGame(gameObject));
-                console.log('joining game');
-                history.push('/game');
+                if (!gameObject) {
+                    setErrMsg('Invitation probably cancelled by inviter');
+                } else{
+                    dispatch(CreateGame(gameObject));
+                    console.log('joining game');
+                    history.push('/game');
+                }
             })
             newSocket.on('messageRecieved', async message => {
                 dispatch(AddMessageToState(message));
@@ -61,6 +69,9 @@ function Menu(props) {
             newSocket.on('friendDisconnected', userId => {
                 console.log('user ' + userId + ' disconnected')
                 dispatch(ChangeIsConnected(userId, false));
+            })
+            newSocket.on('invited', userId => {
+                setIsInvited(userId);
             })
         }
     }
@@ -87,10 +98,28 @@ function Menu(props) {
         socket.emit('requestRandomGame');
     }
 
+    const closeSnackberHandler = (event, reason) => {
+        setIsInvited(undefined);
+    }
+
+    const closeErrSnackberHandler = () => {
+        setErrMsg(undefined);
+    }
+
+    const joinInivitedGame = () => {
+        socket.emit('acceptInvitation', gameInvitation.id);
+    }
+
     return (
     <div className="menu-container">
+            <Snackbar open={gameInvitation} autoHideDuration={6000} onClose={closeSnackberHandler}>
+                <Alert variant="filled" onClick={joinInivitedGame}>{gameInvitation?.username} inivited you to a game, click here to join</Alert>
+            </Snackbar>
+            <Snackbar open={errMsg} autoHideDuration={6000} onClose={closeErrSnackberHandler}>
+                <Alert variant="filled" color="error">{errMsg}</Alert>
+            </Snackbar>
         <Drawer width="200px" open={isDrawOpen} onBackdropClick={() => setIsDrawOpen(false)}>
-                <Friends></Friends>
+                <Friends ></Friends>
         </Drawer>
         <Fab onClick={() => setIsDrawOpen(!isDrawOpen)}>
             <PeopleIcon></PeopleIcon>
