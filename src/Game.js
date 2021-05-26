@@ -2,6 +2,7 @@ import './Game.css';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import BoardSide from './BoardSide';
+import configurations from './configurations'
 
 const Game = (props) => {
     const gameData = useSelector(state => state.gameObject);
@@ -66,8 +67,6 @@ const Game = (props) => {
         setDicesToShow(dicesToShowCopy);
     }, [resultAfterMoving])
 
-
-
     const throwOneDice = () => {
         socket.emit('throwOneDice');
         setIsPreGame(false);
@@ -106,24 +105,6 @@ const Game = (props) => {
         socket.on('moveCoins', (result) => {
             setResultAfterMoving(result);
 
-
-
-
-            //let dicesAfterTurn = dices.filter(d => d !== result.diceStepPlayed);
-            // debugger;
-            // if(dicesAfterTurn.length===0){
-            //     dicesAfterTurn = dices;
-            //     dicesAfterTurn = dicesAfterTurn.pop();
-            //     setDices(dicesAfterTurn);
-            // }
-            // else{
-            //     setDices(dicesAfterTurn);
-            // }
-            // console.log("after: ");
-            // console.log(dices);
-            // debugger;
-            // setDices(dices.filter(d => d !== result.diceStepPlayed));
-            // console.log("after: "+dices);
             const destinationElement = mapIndexToColumn(result.dst, result.isTookOut ? true : false);
             if (result.isEatenOnDst) {
                 const eatenCoin = destinationElement.removeChild(destinationElement.lastChild);
@@ -191,27 +172,27 @@ const Game = (props) => {
 
             let currColClicked = mapperColumnToIndex(elementId);
             let elementClicked = document.getElementById(elementId);
-            if (elementClicked.childNodes.length !== 0 &&
-                (elementClicked.childNodes[0].className.includes(gameData.color ? "white" : "black"))) {
-                if (currColClicked >= 0 && currColClicked <= 23) {
-                    elementClicked.style.backgroundColor = "khaki";
-                    elementClicked.style.opacity = "0.5";
-                }
-                dicesToShow.forEach(d => {
-                    // mapper to dst posiiblity by dices => 
-                    //check if dst elemnt has kids, if has kids check if class name includes same color 
-                    //if so-> draw background
-                    if(!d.isPlayed){
-                        let dstCol = gameData.color ? currColClicked - d.value : currColClicked + d.value;
-                        let dstElement = mapIndexToColumn(dstCol);
-                        if (dstElement.childNodes.length === 0 ||
-                            (dstElement.childNodes[0].className.includes(gameData.color ? "white" : "black")) ||
-                            dstElement.childNodes.length === 1) {
-                            dstElement.style.backgroundColor = "green";
-                            dstElement.style.opacity = "0.5";
-                        }
+            if (isMyTurn) {
+                if (elementClicked.childNodes.length !== 0 &&
+                    (elementClicked.childNodes[0].className.includes(gameData.color ? "white" : "black"))) {
+                    if (currColClicked >= 0 && currColClicked <= 23) {
+                        elementClicked.style.backgroundColor = "khaki";
+                        elementClicked.style.opacity = "0.5";
                     }
-                })
+                    dicesToShow.forEach(d => {
+                        if (!d.isPlayed) {
+                            let dstCol = gameData.color ? currColClicked - d.value : currColClicked + d.value;
+                            let dstElement = mapIndexToColumn(dstCol);
+                            if (dstElement.childNodes.length === 0 ||
+                                (dstElement.childNodes[0].className.includes(gameData.color ? "white" : "black")) ||
+                                dstElement.childNodes.length === 1) {
+                                dstElement.style.backgroundColor = "green";
+                                dstElement.style.opacity = "0.5";
+                            }
+                        }
+                    })
+                }
+
             }
         } else {
             if (chosenColumnIndexSrc != mapperColumnToIndex(elementId))
@@ -267,8 +248,9 @@ const Game = (props) => {
                 {rivalDice ? <div>rival dice {rivalDice}</div> : null}
                 {dice ? <div>your dice: {dice}</div> : null}
                 {dicesToShow.map(d => {
-                    if (d.isPlayed) return <div className="dice-played">{d.value}</div>
-                    else return <div>{d.value}</div>
+                    let imgSrc = configurations.server + "static/dice" + d.value + ".png"
+                    if (d.isPlayed) return <img src={imgSrc} className="dice dice-played" id={d.value}></img>
+                    else return <img src={imgSrc} className="dice" id={d.value}></img>
                 })}
                 {isWinner !== undefined ? (isWinner === gameData.color ? <div>You are the winner!</div> : <div>You lost!</div>) : null}
             </div>
