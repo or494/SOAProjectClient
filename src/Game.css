@@ -35,11 +35,15 @@
   align-items: center;
 }
 
-.dice{
+.dice {
   height: 100px;
   width: 100px;
   margin-left: 5px;
-} 
-.dice-played{
- opacity: 0.5;
+}
+.dice-played {
+  opacity: 0.5;
+}
+
+.rotate-board {
+  transform: rotate(180deg);
 }

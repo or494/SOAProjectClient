@@ -3,8 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import BoardSide from './BoardSide';
 import configurations from './configurations'
+import { useHistory } from 'react-router';
 
 const Game = (props) => {
+    const history = useHistory();
     const gameData = useSelector(state => state.gameObject);
     const socket = useSelector(state => state.socketIO);
     let number = -1;
@@ -215,18 +217,13 @@ const Game = (props) => {
         addToElement.appendChild(coin);
     }
 
-    const clearCoins = () => {
-        for (let index = 0; index < 5; index++) {
-            document.getElementById("RightBottom" + index).innerHTML = '';
-            document.getElementById("RightTop" + index).innerHTML = '';
-            document.getElementById("LeftBottom" + index).innerHTML = '';
-            document.getElementById("LeftTop" + index).innerHTML = '';
-        }
+    const backToMenu = () => {
+        history.push('/menu');
     }
 
     return (
         <div className="game-main-grid">
-            <div className="game-board">
+            <div className={'game-board'}>
                 <div className="game-board-row">
                     <div id="outWhiteCoins" className="game-out-coins" onClick={handleTookOrEatenClick}></div>
                     <div className="game-board-column">
@@ -252,7 +249,7 @@ const Game = (props) => {
                     if (d.isPlayed) return <img src={imgSrc} className="dice dice-played" id={d.value}></img>
                     else return <img src={imgSrc} className="dice" id={d.value}></img>
                 })}
-                {isWinner !== undefined ? (isWinner === gameData.color ? <div>You are the winner!</div> : <div>You lost!</div>) : null}
+                {isWinner !== undefined ? (isWinner === gameData.color ? <div>You are the winner!<button onClick={backToMenu}></button></div> : <div>You lost!</div>) : null}
             </div>
         </div>
     );

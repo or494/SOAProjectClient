@@ -27,7 +27,7 @@ function Friends(props) {
     return (
         <div className="friends-container">
             <div>
-                <TextField fullWidth={true} id="filled-basic" label="Filled" variant="filled" value={searchInput} onChange={handleSearchInputChange}/>
+                <TextField fullWidth="true" className="chat-text-field" label="Search for friend" variant="filled" value={searchInput} onChange={handleSearchInputChange}/>
             </div>
             {searchResult == undefined ? (friends.map(friend => {
                 return <FriendView isFriend={true} user={friend}></FriendView>
