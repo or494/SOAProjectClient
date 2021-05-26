@@ -16,6 +16,7 @@ import Alert from '@material-ui/lab/Alert';
 
 function Menu(props) {
     const chats = useSelector(state => state.chatsList);
+    const userId = useSelector(state => state.userId);
     const friends = useSelector(state => state.friendsList);
     const dispatch = useDispatch();
     const history = useHistory();
@@ -24,6 +25,8 @@ function Menu(props) {
     const [isInvited, setIsInvited] = useState(false);
     const [gameInvitation, setGameInvitation] = useState();
     const [errMsg, setErrMsg] = useState();
+    const [isInfoMsg, setIsInfoMsg] = useState();
+    const [infoMsg, setInfoMsg] = useState();
 
     useEffect(() => {
         InitializeAppData();
@@ -33,6 +36,27 @@ function Menu(props) {
         const user = friends.find(user => user.id == isInvited);
         setGameInvitation(user);
     }, [isInvited])
+
+    useEffect(() => {
+        const user = friends.find(user => user.id == isInfoMsg);
+        if (user!=undefined) {
+            setInfoMsg(user?.username + ' set you a message');
+        }
+    }, [isInfoMsg])
+
+    const GetFriends = () => {
+        axios.get(configurations.server + 'getFriends', {withCredentials: true}).then(result => {
+            console.log(result.data);
+            result.data.forEach(friend => {
+                dispatch(AddFriendToList(friend));
+            });
+        }).catch(err => console.log(err));
+    }
+
+    useEffect(() => {
+        console.log('freind added');
+        if(friends.length == 0)GetFriends();
+    }, [friends]);
 
     const InitializeAppData = () => {
         GetChatsData();
@@ -58,6 +82,9 @@ function Menu(props) {
             })
             newSocket.on('messageRecieved', async message => {
                 dispatch(AddMessageToState(message));
+                if (message.sender != userId) {
+                    setIsInfoMsg(message.sender);
+                }
             });
             newSocket.on('friendAdded', friend => {
                 dispatch(AddFriendToList(friend));
@@ -98,25 +125,34 @@ function Menu(props) {
         socket.emit('requestRandomGame');
     }
 
-    const closeSnackberHandler = (event, reason) => {
+    const closeSnackbarHandler = () => {
         setIsInvited(undefined);
     }
 
-    const closeErrSnackberHandler = () => {
+    const closeErrSnackbarHandler = () => {
         setErrMsg(undefined);
     }
 
     const joinInivitedGame = () => {
         socket.emit('acceptInvitation', gameInvitation.id);
+        setGameInvitation(undefined);
+    }
+
+    const closeInfoSnackbarHandler = () => {
+        setIsInfoMsg(undefined);
+        setInfoMsg(undefined);
     }
 
     return (
     <div className="menu-container">
-            <Snackbar open={gameInvitation} autoHideDuration={6000} onClose={closeSnackberHandler}>
+            <Snackbar open={gameInvitation} autoHideDuration={6000} onClose={closeSnackbarHandler}>
                 <Alert variant="filled" onClick={joinInivitedGame}>{gameInvitation?.username} inivited you to a game, click here to join</Alert>
             </Snackbar>
-            <Snackbar open={errMsg} autoHideDuration={6000} onClose={closeErrSnackberHandler}>
+            <Snackbar open={errMsg} autoHideDuration={6000} onClose={closeErrSnackbarHandler}>
                 <Alert variant="filled" color="error">{errMsg}</Alert>
+            </Snackbar>
+            <Snackbar open={infoMsg} autoHideDuration={6000} onClose={closeInfoSnackbarHandler}>
+                <Alert variant="filled" color="info">{infoMsg}</Alert>
             </Snackbar>
         <Drawer width="200px" open={isDrawOpen} onBackdropClick={() => setIsDrawOpen(false)}>
                 <Friends ></Friends>
