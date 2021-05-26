@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import BoardSide from './BoardSide';
 import configurations from './configurations'
 import { useHistory } from 'react-router';
+import { Button } from '@material-ui/core';
 
 const Game = (props) => {
     const history = useHistory();
@@ -185,11 +186,13 @@ const Game = (props) => {
                         if (!d.isPlayed) {
                             let dstCol = gameData.color ? currColClicked - d.value : currColClicked + d.value;
                             let dstElement = mapIndexToColumn(dstCol);
-                            if (dstElement.childNodes.length === 0 ||
-                                (dstElement.childNodes[0].className.includes(gameData.color ? "white" : "black")) ||
-                                dstElement.childNodes.length === 1) {
-                                dstElement.style.backgroundColor = "green";
-                                dstElement.style.opacity = "0.5";
+                            if (dstCol>=0 && dstCol<=23) {           
+                                if (dstElement.childNodes.length === 0 ||
+                                    (dstElement.childNodes[0].className.includes(gameData.color ? "white" : "black")) ||
+                                    dstElement.childNodes.length === 1) {
+                                        dstElement.style.backgroundColor = "green";
+                                        dstElement.style.opacity = "0.5";
+                                    }
                             }
                         }
                     })
@@ -221,6 +224,11 @@ const Game = (props) => {
         history.push('/menu');
     }
 
+    const retireGame = () => {
+        socket.emit('leaveGame');
+        backToMenu();
+    }
+
     return (
         <div className="game-main-grid">
             <div className={'game-board'}>
@@ -237,19 +245,24 @@ const Game = (props) => {
                     <div id="outBlackCoins" className="game-out-coins" onClick={handleTookOrEatenClick}></div>
                 </div>
             </div>
-            <div>
-                <div>Your color: {gameData.color ? 'white' : 'black'}</div>
-                {isPreGame ? <button onClick={throwOneDice}>Throw one dice</button> : null}
-                {isPreGame == false && isThrowDices ? <button onClick={throwDices}>Throw dices</button> : null}
-                {isPreGame == false ? (isMyTurn ? <div>its your turn</div> : <div>its rival's turn</div>) : null}
-                {rivalDice ? <div>rival dice {rivalDice}</div> : null}
-                {dice ? <div>your dice: {dice}</div> : null}
-                {dicesToShow.map(d => {
-                    let imgSrc = configurations.server + "static/dice" + d.value + ".png"
-                    if (d.isPlayed) return <img src={imgSrc} className="dice dice-played" id={d.value}></img>
-                    else return <img src={imgSrc} className="dice" id={d.value}></img>
-                })}
-                {isWinner !== undefined ? (isWinner === gameData.color ? <div>You are the winner!<button onClick={backToMenu}></button></div> : <div>You lost!</div>) : null}
+            <div className="game-data">
+                <div className="game-text">Your color: {gameData.color ? 'white' : 'black'}</div>
+                {isPreGame ? <Button variant="contained" onClick={throwOneDice}>Throw one dice</Button> : null}
+                {isPreGame == false && isThrowDices ? <Button variant="contained" onClick={throwDices}>Throw dices</Button> : null}
+                {isPreGame == false ? (isMyTurn ? <div className="game-text">its your turn</div> : <div className="game-text">its rival's turn</div>) : null}
+                {rivalDice ? <div className="game-text"> rival dice {rivalDice}</div> : null}
+                {dice ? <div className="game-text">your dice: {dice}</div> : null}
+                <div>
+                    {dicesToShow.map(d => {
+                        let imgSrc = configurations.server + "static/dice" + d.value + ".png"
+                        if (d.isPlayed) return <img src={imgSrc} className="dice dice-played" id={d.value}></img>
+                        else return <img src={imgSrc} className="dice" id={d.value}></img>
+                    })}
+                </div>
+                {isWinner !== undefined ? (isWinner === gameData.color ? <div className="game-text">You are the winner!</div> : <div className="game-text">You lost!</div>) : null}
+                <div>
+                    <Button variant="contained" onClick={retireGame}>Back to menu</Button>
+                </div>
             </div>
         </div>
     );
