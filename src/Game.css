@@ -35,6 +35,11 @@
   align-items: center;
 }
 
+.dice{
+  height: 100px;
+  width: 100px;
+  margin-left: 5px;
+} 
 .dice-played{
-  background-color: red;
+ opacity: 0.5;
 }

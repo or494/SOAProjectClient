@@ -1,13 +1,17 @@
+import './Register.css'
 import { useState } from "react";
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import configurations from './configurations';
+import Layout from './Layout'
+import Row from './Row'
+import Box from './Box'
 
 function Register(props) {
     const [username, setUsername] = useState();
     const [usernameError, setUsernameError] = useState();
     const [email, setEmail] = useState();
-    const [emailError, setEmailError] =useState();
+    const [emailError, setEmailError] = useState();
     const [password, setPassword] = useState();
     const [passwordError, setPasswordError] = useState();
     const history = useHistory();
@@ -16,14 +20,17 @@ function Register(props) {
     );
     const changeUsername = (event) => {
         setUsername(event.target.value);
+        setUsernameError("");
     }
 
     const changeEmail = (event) => {
         setEmail(event.target.value);
+        setEmailError("");
     }
 
     const changePassword = (event) => {
         setPassword(event.target.value);
+        setPasswordError("");
     }
 
     const registerValidation = () => {
@@ -64,31 +71,45 @@ function Register(props) {
         }, { withCredentials: true })
             .then(res => {
                 console.log(res.data);
-                if(res.data == true){
+                if (res.data == true) {
                     history.push('/menu');
+                }
+                else if(res.data===3){
+                    setUsernameError("Username is already in use!")
+                }
+                else if(res.data===4){
+                    setEmailError("Email is already in use!")
                 }
             })
             .catch(err => console.log(err));
-        }
-    
-        return (
-            <div>
-                <div>
-                    username <input type="text" placeholder="username" value={username} onChange={changeUsername}></input>
-                </div>
-                <div>{usernameError}</div>
-                <div>
-                    email <input type="text" placeholder="email" value={email} onChange={changeEmail}></input>
-                </div>
-                <div>{emailError}</div>
-                <div>
-                    password <input type="password" placeholder="password" value={password} onChange={changePassword}></input>
-                </div>
-                <div>{passwordError}</div>
-                <button onClick={register}>register</button>
-            </div>
-        );
     }
-    
-    export default Register;
-    
+
+    return (
+        <Layout>
+            <Box>
+                <Row>
+                    <div>
+                        <div className="Input">
+                            Username <input type="text"  value={username} onChange={changeUsername}></input>
+                        </div>
+                        <div>{usernameError}</div>
+                        <div className="Input">
+                            password <input type="password"  value={password} onChange={changePassword}></input>
+                        </div>
+                        <div>{passwordError}</div>
+                        <div className="Input">
+                            email <input type="text" value={email} onChange={changeEmail}></input>
+                        </div>
+                        <div>{emailError}</div>
+                        <Row>
+                            <button onClick={register}>register</button>
+                        </Row>
+
+                    </div>
+                </Row>
+            </Box>
+        </Layout>
+    );
+}
+
+export default Register;
