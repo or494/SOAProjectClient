@@ -5,6 +5,7 @@ import { useHistory } from 'react-router';
 import Slide from '@material-ui/core/Slide';
 import Chat from './Chat';
 import { useSelector } from 'react-redux';
+import configurations from './configurations';
 
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -27,14 +28,16 @@ function FriendView(props) {
     return (
         <div className="friend-view-container">
             <div className="friend-view-grid">
-                <div className={(props.user.isConnected ? 'green' : 'red') + " friend-view-image-container"}></div>
+                <div className={(props.user.isConnected ? 'green' : 'red') + " friend-view-image-container"}>
+                    <img src={configurations.server + 'static/Person.png'} className="friend-view-image"/>
+                </div>
                 <div className="friend-view-name">{props.user.username}</div>
                 { props.isFriend?
                     (<div className="friend-view-btns-container">
-                        <Button fullWidth="true" user={props.user} onClick={() => setIsChatModalOpen(true)}>
+                        <Button variant="contained" fullWidth="true" color="primary" user={props.user} onClick={() => setIsChatModalOpen(true)}>
                             Chat
                         </Button>
-                        <Button fullWidth="true" onClick={inviteToGame}>
+                        <Button variant="contained" fullWidth="true" color="secondary" onClick={inviteToGame}>
                             Invite to game
                         </Button>
                     </div>) : 

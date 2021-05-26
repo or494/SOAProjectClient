@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import configurations from '../src/configurations';
 import {AddFriendToList} from './Actions/action';
 import FriendView from './FriendView';
+import TextField from '@material-ui/core/TextField';
 
 function Friends(props) {
     const friends = useSelector(state => state.friendsList);
@@ -12,20 +13,6 @@ function Friends(props) {
     const [searchInput, setSearchInput] = useState('');
     const [searchResult, setSearchResult] = useState()
     const dispatch = useDispatch();
-
-    useEffect(() => {
-        console.log('freind added');
-        if(friends.length == 0)GetFriends();
-    }, [friends]);
-
-
-    const GetFriends = () => {
-        axios.get(configurations.server + 'getFriends', {withCredentials: true}).then(result => {
-            result.data.forEach(friend => {
-                dispatch(AddFriendToList(friend));
-            });
-        }).catch(err => console.log(err));
-    }
 
     const handleSearchInputChange = (event) => {
         setSearchInput(event.target.value);
@@ -40,7 +27,7 @@ function Friends(props) {
     return (
         <div className="friends-container">
             <div>
-                <input value={searchInput} onChange={handleSearchInputChange}></input>
+                <TextField fullWidth={true} id="filled-basic" label="Filled" variant="filled" value={searchInput} onChange={handleSearchInputChange}/>
             </div>
             {searchResult == undefined ? (friends.map(friend => {
                 return <FriendView isFriend={true} user={friend}></FriendView>
